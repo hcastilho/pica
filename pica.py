@@ -1,11 +1,13 @@
 #! /usr/bin/env python
-
+import logging
+import os
 import yaml
 from  datetime import date, datetime, timedelta
-import os
 from operator import itemgetter
 
 import click
+
+logger = logging.getLogger()
 
 MIN_PERIOD = timedelta(minutes=10)
 TOTAL_HEADER = """
@@ -41,7 +43,6 @@ def main(ctx, file):
 @main.command()
 @passctx
 def tik(ctx):
-    print('tik')
     timetable = read_timetable(ctx)
     latest = get_latest_day(timetable)
     period = get_latest_period(latest['table'])
@@ -60,7 +61,7 @@ def tik(ctx):
         except (KeyError, IndexError):
             interval = None
         if interval and interval < MIN_PERIOD:
-            print('Interval of {} is less then {} min'.format(
+            logger.info('Interval of {} is less then {} min'.format(
                 interval.seconds/60,
                 MIN_PERIOD.seconds/60,
             ))
@@ -70,7 +71,7 @@ def tik(ctx):
             return
 
     period[key] = now
-    print('{}: {}'.format(key, now))
+    logger.info('{}: {}'.format(key, now))
     write_timetable(ctx, timetable)
 
 

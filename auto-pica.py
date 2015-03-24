@@ -1,22 +1,40 @@
 #! /usr/bin/env python
-import gobject
+import logging
 import dbus
 import dbus.mainloop.glib
-import subprocess
-from os.path import expanduser
+import gobject
 import signal
+import subprocess
 import sys
 
-from pprint import pprint
+from os.path import expanduser
+
 from pica import next_tik_type
 
+logging.basicConfig(
+        filename='/home/hcastilho/dev/pica/pica.log',
+        level=logging.DEBUG,
+        format=('{"datetime": "%(asctime)s", '
+                '"level": "%(levelname)s", '
+                '"message": "%(message)s"}')
+        )
+logger = logging.getLogger()
 
 def active_changed_handler(*args):
+    logger.info('active_changed_handler {}'.format(args))
     tik()
-stop_handler = active_changed_handler
+    logger.info('done')
+
+def stop_handler(*args):
+    logger.info('stop_handler {}'.format(args))
+    tik()
+    logger.info('done')
 
 def signal_handler(*args):
+    logger.info('signal_handler {}'.format(args))
     tik()
+    logger.info('done')
+    logger.info('exiting 2...')
     sys.exit(0)
 
 
@@ -30,6 +48,7 @@ def tik():
 
 
 if __name__ == '__main__':
+    logger.info('Starting')
     # handle Unix signals
     # (SIGKILL and SIGSTOP cannot be caught, blocked, or ignored)
     signal.signal(signal.SIGHUP, signal_handler)
@@ -40,7 +59,9 @@ if __name__ == '__main__':
     # the remaining signals are considered fatal and are left unhandledal.signal(signal.SIGTERM, sigterm_handler)
 
     if next_tik_type() == 'in':
+        logger.info('Startup tik')
         tik()
+        logger.info('done...')
 
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
     bus = dbus.SessionBus()
@@ -49,11 +70,12 @@ if __name__ == '__main__':
         dbus_interface="org.gnome.ScreenSaver",
         signal_name = "ActiveChanged")
     bus.add_signal_receiver(
-        active_changed_handler,
+        stop_handler,
         dbus_interface="org.gnome.SessionManager.ClientPrivate",
         signal_name = "Stop")
     loop = gobject.MainLoop()
     try:
         loop.run()
     except KeyboardInterrupt:
+        logger.info('exiting 1...')
         sys.exit(0)
