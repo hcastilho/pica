@@ -4,12 +4,9 @@ import dbus
 import dbus.mainloop.glib
 import gobject
 import signal
-import subprocess
 import sys
 
-from os.path import expanduser
-
-from pica import next_tik_type
+from pica import tik, next_tik_type
 
 logging.basicConfig(
         filename='/home/hcastilho/dev/pica/pica.log',
@@ -36,15 +33,6 @@ def signal_handler(*args):
     logger.info('done')
     logger.info('exiting 2...')
     sys.exit(0)
-
-
-def tik():
-    cmd = [
-        expanduser('~/.virtualenvs/pica/bin/python'),
-        expanduser('~/dev/pica/pica.py'),
-        'tik',
-    ]
-    subprocess.call(cmd)
 
 
 if __name__ == '__main__':

@@ -39,11 +39,13 @@ def main(ctx, file):
     ctx.obj = Context(file)
 
 
-#@main.command('tik')
-@main.command()
+@main.command('tik')
 @passctx
-def tik(ctx):
-    timetable = read_timetable(ctx)
+def _tik(ctx):
+    tik(ctx.file)
+
+def tik(fname):
+    timetable = read_timetable(fname)
     latest = get_latest_day(timetable)
     period = get_latest_period(latest['table'])
     key = 'out' if 'in' in period else 'in'
@@ -67,18 +69,22 @@ def tik(ctx):
             ))
             del previous['out']
             latest['table'].remove(period)
-            write_timetable(ctx, timetable)
+            write_timetable(fname, timetable)
             return
 
     period[key] = now
     logger.info('{}: {}'.format(key, now))
-    write_timetable(ctx, timetable)
+    write_timetable(fname, timetable)
 
 
-@main.command()
+@main.command('show')
 @passctx
-def show(ctx):
-    timetable = read_timetable(ctx)
+def _show(ctx):
+    show(ctx.file)
+
+
+def show(fname):
+    timetable = read_timetable(fname)
     print(TOTAL_HEADER)
     for day in timetable:
         worktime = timedelta()
@@ -103,10 +109,14 @@ def calc_length(period):
     return diff
 
 
-@main.command()
+@main.command('table')
 @passctx
-def table(ctx):
-    timetable = read_timetable(ctx)
+def _table(ctx):
+    table(ctx.file)
+
+
+def table(fname):
+    timetable = read_timetable(fname)
     print(TABLE_HEADER)
     for day in timetable:
         for i, period in enumerate(day['table']):
@@ -141,9 +151,9 @@ def get_latest_period(periods):
     return period
 
 
-def read_timetable(ctx):
+def read_timetable(fname):
     try:
-        with open(ctx.file) as handle:
+        with open(fname) as handle:
             timetable = yaml.load(handle.read())
     except FileNotFoundError:
         timetable = []
@@ -157,14 +167,14 @@ def read_timetable(ctx):
     return timetable
 
 
-def write_timetable(ctx, timetable):
-    with open(ctx.file, 'w') as handle:
+def write_timetable(fname, timetable):
+    with open(fname, 'w') as handle:
         handle.write(yaml.dump(timetable))
 
 
 def next_tik_type():
-    ctx=Context(os.path.expanduser('~/dev/pica/time.yaml'))
-    timetable = read_timetable(ctx)
+    fname = os.path.expanduser('~/dev/pica/time.yaml')
+    timetable = read_timetable(fname)
     latest = get_latest_day(timetable)
     period = get_latest_period(latest['table'])
     return 'out' if 'in' in period else 'in'
