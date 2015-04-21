@@ -1,8 +1,10 @@
 #! /usr/bin/env python
+# https://github.com/backloop/gendsession/blob/master/gendsession.py
 import logging
 import dbus
 import dbus.mainloop.glib
 import gobject
+import os
 import signal
 import sys
 
@@ -17,19 +19,28 @@ logging.basicConfig(
         )
 logger = logging.getLogger()
 
+fname = os.path.expanduser('~/dev/pica/time.yaml')
+
+loop = None
+
 def active_changed_handler(*args):
     logger.info('active_changed_handler {}'.format(args))
-    tik()
+    tik(fname)
     logger.info('done')
 
 def stop_handler(*args):
     logger.info('stop_handler {}'.format(args))
-    tik()
+    tik(fname)
     logger.info('done')
+    logger.info('exiting 1...')
+    loop.stop()
+    #sys.exit(0)
 
+# SIGHUP 1
+# SIGTERM 15
 def signal_handler(*args):
     logger.info('signal_handler {}'.format(args))
-    tik()
+    tik(fname)
     logger.info('done')
     logger.info('exiting 2...')
     sys.exit(0)
@@ -48,7 +59,7 @@ if __name__ == '__main__':
 
     if next_tik_type() == 'in':
         logger.info('Startup tik')
-        tik()
+        tik(fname)
         logger.info('done...')
 
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)

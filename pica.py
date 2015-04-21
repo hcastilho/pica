@@ -90,7 +90,8 @@ def show(fname):
         worktime = timedelta()
         for period in day['table']:
             worktime = worktime + calc_length(period)
-        print(TOTAL_ROW.format(day['date'], str(worktime)))
+        # TODO timedelta.strftime
+        print(TOTAL_ROW.format(day['date'], worktime))
     print(TOTAL_FOOTER)
 
 
