@@ -33,7 +33,7 @@ def stop_handler(*args):
     tik(fname)
     logger.info('done')
     logger.info('exiting 1...')
-    loop.stop()
+    loop.quit()
     #sys.exit(0)
 
 # SIGHUP 1
