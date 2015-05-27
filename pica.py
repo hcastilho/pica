@@ -9,7 +9,7 @@ import click
 
 logger = logging.getLogger()
 
-MIN_PERIOD = timedelta(minutes=10)
+MIN_PERIOD = timedelta(minutes=15)
 TOTAL_HEADER = """
   -----------------------
  |     Day    |   Total  |
